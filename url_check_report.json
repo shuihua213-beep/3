@@ -1,0 +1,182 @@
+{
+  "url": "http://localhost:29983",
+  "startedAt": 1773092348740,
+  "finishedAt": 1773092358673,
+  "errors": {
+    "js": [
+      {
+        "type": "console",
+        "message": "Failed to load resource: the server responded with a status of 404 (Not Found) {\"url\":\"http://localhost:29983/vite.svg?__aidp_probe=1773092356812\",\"lineNumber\":0,\"columnNumber\":0}",
+        "timestamp": 1773092356819,
+        "severity": "error",
+        "phase": "init"
+      }
+    ],
+    "network": [
+      {
+        "url": "http://localhost:29983/vite.svg?__aidp_probe=1773092356812",
+        "type": "image",
+        "method": "GET",
+        "status": 404,
+        "ok": false,
+        "from": "network"
+      }
+    ],
+    "images": []
+  },
+  "styleAudit": {
+    "rate": 0,
+    "unuseClasses": [],
+    "unuseCount": 0,
+    "definedCount": 222,
+    "scannedElementCount": 120,
+    "inaccessibleStyleSheets": 0
+  },
+  "perfTags": [
+    {
+      "name": "lcp",
+      "value": 190.66666666666666,
+      "unit": "ms",
+      "source": "performance",
+      "category": "good"
+    },
+    {
+      "name": "cls",
+      "value": 0,
+      "unit": "unitless",
+      "source": "performance",
+      "category": "good"
+    },
+    {
+      "name": "fcp",
+      "value": 190.66666666666666,
+      "unit": "ms",
+      "source": "performance",
+      "category": "good"
+    },
+    {
+      "name": "ttfb",
+      "value": 8.233333334326744,
+      "unit": "ms",
+      "source": "performance",
+      "category": "good"
+    }
+  ],
+  "perfProfiles": [
+    {
+      "profile": "unthrottled",
+      "tags": [
+        {
+          "name": "lcp",
+          "value": 190.66666666666666,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "cls",
+          "value": 0,
+          "unit": "unitless",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "fcp",
+          "value": 190.66666666666666,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "ttfb",
+          "value": 8.233333334326744,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        }
+      ]
+    },
+    {
+      "profile": "4g",
+      "tags": [
+        {
+          "name": "lcp",
+          "value": 1344,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "cls",
+          "value": 0,
+          "unit": "unitless",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "fcp",
+          "value": 1344,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        },
+        {
+          "name": "ttfb",
+          "value": 10.700000000496706,
+          "unit": "ms",
+          "source": "performance",
+          "category": "good"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "jsErrorCount": 1,
+    "failedStaticResources": 1,
+    "firstScreenIssues": 0,
+    "styleMismatchRate": 0,
+    "styleMismatchCount": 0,
+    "styleDefinedCount": 222,
+    "styleMismatchClasses": [],
+    "styleAcceptable": true,
+    "performance": {
+      "unthrottled": {
+        "lcp": {
+          "value": 190.66666666666666,
+          "category": "good"
+        },
+        "cls": {
+          "value": 0,
+          "category": "good"
+        },
+        "fcp": {
+          "value": 190.66666666666666,
+          "category": "good"
+        },
+        "ttfb": {
+          "value": 8.233333334326744,
+          "category": "good"
+        }
+      },
+      "4g": {
+        "lcp": {
+          "value": 1344,
+          "category": "good"
+        },
+        "cls": {
+          "value": 0,
+          "category": "good"
+        },
+        "fcp": {
+          "value": 1344,
+          "category": "good"
+        },
+        "ttfb": {
+          "value": 10.700000000496706,
+          "category": "good"
+        }
+      }
+    },
+    "finalScore": 80
+  }
+}
