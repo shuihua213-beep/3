@@ -1,0 +1,185 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index 0dfdcc4..74c17aa 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,15 +1,5 @@
+ import React, { useState, useEffect, useMemo, useRef } from 'react';
+-
+-interface Emotion {
+-  id: string;
+-  name: string;
+-  emoji: string;
+-  color: string;
+-  gradient: string;
+-  particle: string;
+-  questions: string[];
+-  greeting: string;
+-}
++import { Emotion, loadEmotions } from './db';
+ 
+ interface DiaryEntry {
+   id: string;
+@@ -29,99 +19,6 @@ interface Filters {
+   endDate: string;
+ }
+ 
+-const emotions: Emotion[] = [
+-  {
+-    id: 'happy',
+-    name: '开心',
+-    emoji: '😊',
+-    color: '#FFD93D',
+-    gradient: 'from-yellow-400 via-orange-300 to-amber-500',
+-    particle: '✨',
+-    questions: ['今天有什么让你快乐的事情发生？', '谁让你今天感到开心？', '这个快乐的时刻教会了你什么？', '你想如何延续这份快乐？', '你希望明天也有这样的心情吗？'],
+-    greeting: '很高兴看到你今天心情不错！✨'
+-  },
+-  {
+-    id: 'sad',
+-    name: '悲伤',
+-    emoji: '😢',
+-    color: '#6B8DD6',
+-    gradient: 'from-blue-400 via-blue-500 to-cyan-600',
+-    particle: '💧',
+-    questions: ['是什么让你今天感到悲伤？', '这种悲伤的感觉持续多久了？', '你觉得需要有人陪伴你吗？', '有没有什么小事能让你感觉好一点？', '你想对现在的自己说些什么？'],
+-    greeting: '我理解你现在可能不太好受，让我陪伴你。💙'
+-  },
+-  {
+-    id: 'anxious',
+-    name: '焦虑',
+-    emoji: '😰',
+-    color: '#FF8C42',
+-    gradient: 'from-orange-400 via-amber-400 to-yellow-500',
+-    particle: '🌀',
+-    questions: ['是什么让你今天感到焦虑？', '这种焦虑感有多强烈？', '有什么是你现在可以控制的？', '深呼吸，现在最让你担心的是什么？', '你想如何缓解这种情绪？'],
+-    greeting: '焦虑是正常的，让我们一起理清思绪。🌬️'
+-  },
+-  {
+-    id: 'calm',
+-    name: '平静',
+-    emoji: '😌',
+-    color: '#88D498',
+-    gradient: 'from-green-300 via-emerald-400 to-teal-500',
+-    particle: '🍃',
+-    questions: ['是什么让你感到如此平静？', '你是如何达到这种状态的？', '在这种平静中你注意到了什么？', '你想用这份宁静的时光做什么？', '如何在日常中保持这种心境？'],
+-    greeting: '享受这份宁静的时刻吧。🍃'
+-  },
+-  {
+-    id: 'bored',
+-    name: '无聊',
+-    emoji: '😐',
+-    color: '#A8A8A8',
+-    gradient: 'from-gray-400 via-slate-400 to-zinc-500',
+-    particle: '💭',
+-    questions: ['你觉得今天为什么会无聊？', '有没有什么一直想尝试但没做的事？', '如果可以做任何事，你想做什么？', '最近有什么让你感兴趣的事物？', '明天你希望有什么不同？'],
+-    greeting: '无聊也是一种信号，也许是时候尝试新事物了。💭'
+-  },
+-  {
+-    id: 'excited',
+-    name: '兴奋',
+-    emoji: '🤩',
+-    color: '#FF6B9D',
+-    gradient: 'from-pink-400 via-rose-500 to-red-400',
+-    particle: '⚡',
+-    questions: ['什么事情让你如此兴奋？', '你已经期待多久了？', '这件事对你意味着什么？', '你想和谁分享这份兴奋？', '这份兴奋感让你想到了什么？'],
+-    greeting: '哇！感受到你的能量了！⚡'
+-  },
+-  {
+-    id: 'frustrated',
+-    name: '沮丧',
+-    emoji: '😤',
+-    color: '#E85D75',
+-    gradient: 'from-red-400 via-rose-500 to-pink-600',
+-    particle: '💢',
+-    questions: ['是什么让你今天感到沮丧？', '这种情况持续多久了？', '你觉得问题出在哪里？', '有没有人可以帮助你？', '如果问题解决了会怎样？'],
+-    greeting: '沮丧说明你在乎，让我们一起面对。❤️'
+-  },
+-  {
+-    id: 'grateful',
+-    name: '感恩',
+-    emoji: '🙏',
+-    color: '#F0A6CA',
+-    gradient: 'from-pink-300 via-rose-300 to-orange-300',
+-    particle: '💝',
+-    questions: ['今天你最感恩的是什么？', '有谁让你心存感激？', '你从这份感恩中学到了什么？', '你想如何表达这份感谢？', '这份感恩让你对未来有什么期待？'],
+-    greeting: '感恩的心让生活更美好。💝'
+-  },
+-  {
+-    id: 'confused',
+-    name: '困惑',
+-    emoji: '😕',
+-    color: '#9B8AC4',
+-    gradient: 'from-cyan-400 via-teal-400 to-emerald-500',
+-    particle: '❓',
+-    questions: ['什么事情让你感到困惑？', '你觉得困惑的根源是什么？', '有没有人可能帮你解答？', '如果答案出现了会怎样？', '困惑本身教会了你什么？'],
+-    greeting: '困惑意味着你在思考和成长。🌱'
+-  }
+-];
+-
+ const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+ 
+ const extractTitle = (content: string): string => {
+@@ -177,6 +74,8 @@ const saveDiaries = (diaries: DiaryEntry[]) => {
+ 
+ export default function App() {
+   const [page, setPage] = useState<'home' | 'questions' | 'diary' | 'history' | 'detail'>('home');
++  const [emotions, setEmotions] = useState<Emotion[]>([]);
++  const [loading, setLoading] = useState(true);
+   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
+   const [currentQuestion, setCurrentQuestion] = useState(0);
+   const [answers, setAnswers] = useState<string[]>([]);
+@@ -200,7 +99,26 @@ export default function App() {
+     setPrefersReducedMotion(mediaQuery.matches);
+     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+     mediaQuery.addEventListener('change', handler);
+-    return () => mediaQuery.removeEventListener('change', handler);
++
++    let cancelled = false;
++    loadEmotions().then((loaded) => {
++      if (!cancelled) {
++        setEmotions(loaded);
++        setLoading(false);
++      }
++    });
++
++    const onEmotionsChanged = (e: Event) => {
++      const detail = (e as CustomEvent<Emotion[]>).detail;
++      setEmotions(detail);
++    };
++    window.addEventListener('emotions-changed', onEmotionsChanged);
++
++    return () => {
++      cancelled = true;
++      mediaQuery.removeEventListener('change', handler);
++      window.removeEventListener('emotions-changed', onEmotionsChanged);
++    };
+   }, []);
+ 
+   useEffect(() => {
+@@ -345,7 +263,7 @@ export default function App() {
+       if (filters.endDate && new Date(diary.createdAt) > new Date(filters.endDate + 'T23:59:59')) return false;
+       return true;
+     });
+-  }, [diaries, filters]);
++  }, [diaries, filters, emotions]);
+ 
+   const stats = useMemo(() => {
+     const emotionCounts: Record<string, number> = {};
+@@ -882,6 +800,17 @@ export default function App() {
+     </div>
+   );
+ 
++  if (loading) {
++    return (
++      <div className="min-h-screen bg-gradient-to-br from-sky-400 via-cyan-500 to-teal-500 flex items-center justify-center">
++        <div className="text-center">
++          <div className="text-6xl animate-pulse mb-4">📝</div>
++          <p className="text-white text-xl font-semibold">正在加载情绪数据...</p>
++        </div>
++      </div>
++    );
++  }
++
+   return (
+     <div
+       className={`min-h-screen transition-all duration-700 ${selectedEmotion ? `bg-gradient-to-br ${selectedEmotion.gradient}` : 'bg-gradient-to-br from-sky-400 via-cyan-500 to-teal-500'}`}
