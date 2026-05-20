@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-
-interface Emotion {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  gradient: string;
-  particle: string;
-  questions: string[];
-  greeting: string;
-}
+import { getEmotions, saveEmotion, Emotion } from './db';
 
 interface DiaryEntry {
   id: string;
@@ -28,99 +18,6 @@ interface Filters {
   startDate: string;
   endDate: string;
 }
-
-const emotions: Emotion[] = [
-  {
-    id: 'happy',
-    name: '开心',
-    emoji: '😊',
-    color: '#FFD93D',
-    gradient: 'from-yellow-400 via-orange-300 to-amber-500',
-    particle: '✨',
-    questions: ['今天有什么让你快乐的事情发生？', '谁让你今天感到开心？', '这个快乐的时刻教会了你什么？', '你想如何延续这份快乐？', '你希望明天也有这样的心情吗？'],
-    greeting: '很高兴看到你今天心情不错！✨'
-  },
-  {
-    id: 'sad',
-    name: '悲伤',
-    emoji: '😢',
-    color: '#6B8DD6',
-    gradient: 'from-blue-400 via-blue-500 to-cyan-600',
-    particle: '💧',
-    questions: ['是什么让你今天感到悲伤？', '这种悲伤的感觉持续多久了？', '你觉得需要有人陪伴你吗？', '有没有什么小事能让你感觉好一点？', '你想对现在的自己说些什么？'],
-    greeting: '我理解你现在可能不太好受，让我陪伴你。💙'
-  },
-  {
-    id: 'anxious',
-    name: '焦虑',
-    emoji: '😰',
-    color: '#FF8C42',
-    gradient: 'from-orange-400 via-amber-400 to-yellow-500',
-    particle: '🌀',
-    questions: ['是什么让你今天感到焦虑？', '这种焦虑感有多强烈？', '有什么是你现在可以控制的？', '深呼吸，现在最让你担心的是什么？', '你想如何缓解这种情绪？'],
-    greeting: '焦虑是正常的，让我们一起理清思绪。🌬️'
-  },
-  {
-    id: 'calm',
-    name: '平静',
-    emoji: '😌',
-    color: '#88D498',
-    gradient: 'from-green-300 via-emerald-400 to-teal-500',
-    particle: '🍃',
-    questions: ['是什么让你感到如此平静？', '你是如何达到这种状态的？', '在这种平静中你注意到了什么？', '你想用这份宁静的时光做什么？', '如何在日常中保持这种心境？'],
-    greeting: '享受这份宁静的时刻吧。🍃'
-  },
-  {
-    id: 'bored',
-    name: '无聊',
-    emoji: '😐',
-    color: '#A8A8A8',
-    gradient: 'from-gray-400 via-slate-400 to-zinc-500',
-    particle: '💭',
-    questions: ['你觉得今天为什么会无聊？', '有没有什么一直想尝试但没做的事？', '如果可以做任何事，你想做什么？', '最近有什么让你感兴趣的事物？', '明天你希望有什么不同？'],
-    greeting: '无聊也是一种信号，也许是时候尝试新事物了。💭'
-  },
-  {
-    id: 'excited',
-    name: '兴奋',
-    emoji: '🤩',
-    color: '#FF6B9D',
-    gradient: 'from-pink-400 via-rose-500 to-red-400',
-    particle: '⚡',
-    questions: ['什么事情让你如此兴奋？', '你已经期待多久了？', '这件事对你意味着什么？', '你想和谁分享这份兴奋？', '这份兴奋感让你想到了什么？'],
-    greeting: '哇！感受到你的能量了！⚡'
-  },
-  {
-    id: 'frustrated',
-    name: '沮丧',
-    emoji: '😤',
-    color: '#E85D75',
-    gradient: 'from-red-400 via-rose-500 to-pink-600',
-    particle: '💢',
-    questions: ['是什么让你今天感到沮丧？', '这种情况持续多久了？', '你觉得问题出在哪里？', '有没有人可以帮助你？', '如果问题解决了会怎样？'],
-    greeting: '沮丧说明你在乎，让我们一起面对。❤️'
-  },
-  {
-    id: 'grateful',
-    name: '感恩',
-    emoji: '🙏',
-    color: '#F0A6CA',
-    gradient: 'from-pink-300 via-rose-300 to-orange-300',
-    particle: '💝',
-    questions: ['今天你最感恩的是什么？', '有谁让你心存感激？', '你从这份感恩中学到了什么？', '你想如何表达这份感谢？', '这份感恩让你对未来有什么期待？'],
-    greeting: '感恩的心让生活更美好。💝'
-  },
-  {
-    id: 'confused',
-    name: '困惑',
-    emoji: '😕',
-    color: '#9B8AC4',
-    gradient: 'from-cyan-400 via-teal-400 to-emerald-500',
-    particle: '❓',
-    questions: ['什么事情让你感到困惑？', '你觉得困惑的根源是什么？', '有没有人可能帮你解答？', '如果答案出现了会怎样？', '困惑本身教会了你什么？'],
-    greeting: '困惑意味着你在思考和成长。🌱'
-  }
-];
 
 const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 
@@ -175,7 +72,14 @@ const saveDiaries = (diaries: DiaryEntry[]) => {
   localStorage.setItem(STORAGE_KEYS.DIARIES, JSON.stringify(diaries));
 };
 
+declare global {
+  interface Window {
+    addEmotion: (emotionData: Partial<Emotion> & { id: string; name: string; baseOn?: string }) => Promise<void>;
+  }
+}
+
 export default function App() {
+  const [emotions, setEmotions] = useState<Emotion[]>([]);
   const [page, setPage] = useState<'home' | 'questions' | 'diary' | 'history' | 'detail'>('home');
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -202,6 +106,64 @@ export default function App() {
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
+
+  useEffect(() => {
+    const initEmotions = async () => {
+      try {
+        const dbEmotions = await getEmotions();
+        setEmotions(dbEmotions);
+      } catch (err) {
+        console.error('Failed to load emotions', err);
+      }
+    };
+    initEmotions();
+  }, []);
+
+  useEffect(() => {
+    window.addEmotion = async (emotionData) => {
+      let newEmotion: Emotion = {
+        id: emotionData.id,
+        name: emotionData.name,
+        emoji: emotionData.emoji || '❓',
+        color: emotionData.color || '#999999',
+        gradient: emotionData.gradient || 'from-gray-400 to-gray-600',
+        particle: emotionData.particle || '✨',
+        questions: emotionData.questions || [],
+        greeting: emotionData.greeting || '你好！'
+      };
+
+      if (emotionData.baseOn) {
+        const baseEmotion = emotions.find((e: Emotion) => e.id === emotionData.baseOn);
+        if (baseEmotion) {
+          newEmotion.questions = baseEmotion.questions;
+          if (!emotionData.emoji) newEmotion.emoji = baseEmotion.emoji;
+          if (!emotionData.color) newEmotion.color = baseEmotion.color;
+          if (!emotionData.gradient) newEmotion.gradient = baseEmotion.gradient;
+          if (!emotionData.particle) newEmotion.particle = baseEmotion.particle;
+          if (!emotionData.greeting) newEmotion.greeting = baseEmotion.greeting;
+        }
+      }
+
+      if (newEmotion.questions.length === 0) {
+        newEmotion.questions = [
+          '今天感觉怎么样？',
+          '是什么让你有这种感觉？',
+          '你现在最想做什么？',
+          '有什么可以让你感觉更好吗？',
+          '你想对明天的自己说些什么？'
+        ];
+      }
+
+      try {
+        await saveEmotion(newEmotion);
+        const updatedEmotions = await getEmotions();
+        setEmotions(updatedEmotions);
+        console.log(`Emotion ${newEmotion.name} added successfully!`);
+      } catch (err) {
+        console.error('Failed to add emotion', err);
+      }
+    };
+  }, [emotions]);
 
   useEffect(() => {
     if (isEditing && diaryRef.current) {
@@ -266,7 +228,7 @@ export default function App() {
 
   const addMoreDetails = () => {
     const details = `\n\n--- Additional Thoughts ---\n今天还有一些值得记录的事情：\n- \n- \n-`;
-    setDiaryContent(prev => prev.replace('\n\nUntil tomorrow, Me', details + '\n\nUntil tomorrow, Me'));
+    setDiaryContent((prev: string) => prev.replace('\n\nUntil tomorrow, Me', details + '\n\nUntil tomorrow, Me'));
     setIsEditing(true);
   };
 
@@ -287,7 +249,7 @@ export default function App() {
 
     let updatedDiaries: DiaryEntry[];
     if (currentDiary) {
-      updatedDiaries = diaries.map(d => d.id === currentDiary.id ? newDiary : d);
+      updatedDiaries = diaries.map((d: DiaryEntry) => d.id === currentDiary.id ? newDiary : d);
     } else {
       updatedDiaries = [newDiary, ...diaries];
     }
@@ -311,7 +273,7 @@ export default function App() {
   };
 
   const viewDiaryDetail = (diary: DiaryEntry) => {
-    const emotion = emotions.find(e => e.id === diary.emotionId);
+    const emotion = emotions.find((e: Emotion) => e.id === diary.emotionId);
     if (emotion) {
       setSelectedEmotion(emotion);
       setDiaryContent(diary.content);
@@ -324,20 +286,20 @@ export default function App() {
 
   const deleteDiary = (id: string) => {
     if (window.confirm('确定要删除这篇日记吗？此操作不可撤销。')) {
-      const updated = diaries.filter(d => d.id !== id);
+      const updated = diaries.filter((d: DiaryEntry) => d.id !== id);
       setDiaries(updated);
       saveDiaries(updated);
     }
   };
 
   const filteredDiaries = useMemo(() => {
-    return diaries.filter(diary => {
-      const emotion = emotions.find(e => e.id === diary.emotionId);
+    return diaries.filter((diary: DiaryEntry) => {
+      const emotion = emotions.find((e: Emotion) => e.id === diary.emotionId);
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         const matchesSearch = diary.content.toLowerCase().includes(searchLower) ||
                               diary.title.toLowerCase().includes(searchLower) ||
-                              emotion?.name.includes(filters.search);
+                              (emotion && emotion.name.includes(filters.search));
         if (!matchesSearch) return false;
       }
       if (filters.emotion && diary.emotionId !== filters.emotion) return false;
@@ -349,7 +311,7 @@ export default function App() {
 
   const stats = useMemo(() => {
     const emotionCounts: Record<string, number> = {};
-    diaries.forEach(d => {
+    diaries.forEach((d: DiaryEntry) => {
       emotionCounts[d.emotionId] = (emotionCounts[d.emotionId] || 0) + 1;
     });
     const total = diaries.length;
@@ -399,7 +361,7 @@ export default function App() {
         className="fixed inset-0 overflow-hidden pointer-events-none"
         style={{ transform: prefersReducedMotion ? 'none' : `translate(${(mousePos.x - window.innerWidth / 2) * 0.01}px, ${(mousePos.y - window.innerHeight / 2) * 0.01}px)` }}
       >
-        {floatingParticles.map(p => (
+        {floatingParticles.map((p: any) => (
           <span
             key={p.id}
             className={`absolute ${prefersReducedMotion ? '' : 'animate-bounce'}`}
@@ -417,7 +379,7 @@ export default function App() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 mb-8">
-          {emotions.map((emotion, index) => (
+          {emotions.map((emotion: Emotion, index: number) => (
             <button
               key={emotion.id}
               onClick={() => handleEmotionSelect(emotion)}
